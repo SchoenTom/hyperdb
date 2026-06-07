@@ -1,0 +1,107 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# HyperDataBank — Asset Class Definitions
+# ──────────────────────────────────────────────────────────────────────────────
+# Maps EODHD "Type" field values to our canonical asset class taxonomy.
+# Every security type EODHD returns is mapped here — nothing is dropped.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Canonical asset classes and their EODHD type mappings
+asset_classes:
+
+  equity:
+    description: "Publicly traded equity securities"
+    eodhd_types:
+      - "Common Stock"
+      - "Preferred Stock"
+    subclasses:
+      common_stock:
+        eodhd_types: ["Common Stock"]
+        description: "Ordinary shares with voting rights"
+      preferred_stock:
+        eodhd_types: ["Preferred Stock"]
+        description: "Preferred shares, typically fixed dividend"
+
+  etf:
+    description: "Exchange-traded funds (passive and active)"
+    eodhd_types:
+      - "ETF"
+    subclasses:
+      etf_equity:
+        description: "Equity ETFs"
+      etf_bond:
+        description: "Fixed income ETFs"
+      etf_commodity:
+        description: "Commodity ETFs"
+      etf_mixed:
+        description: "Multi-asset / balanced ETFs"
+      etf_other:
+        description: "Other ETFs (leveraged, inverse, thematic)"
+
+  fund:
+    description: "Mutual funds and open-ended investment companies"
+    eodhd_types:
+      - "Fund"
+      - "FUND"
+
+  bond:
+    description: "Fixed income securities"
+    eodhd_types:
+      - "Bond"
+      - "BOND"
+    subclasses:
+      government:
+        description: "Sovereign / government bonds"
+      corporate:
+        description: "Corporate bonds"
+      municipal:
+        description: "Municipal bonds"
+      agency:
+        description: "Agency bonds (Fannie Mae, Freddie Mac, etc.)"
+
+  index:
+    description: "Market indices (not directly tradeable)"
+    eodhd_types:
+      - "Index"
+      - "INDEX"
+
+  forex:
+    description: "Foreign exchange currency pairs"
+    eodhd_types:
+      - "Currency"
+      - "FOREX"
+
+  crypto:
+    description: "Cryptocurrency trading pairs"
+    eodhd_types:
+      - "Crypto"
+      - "CRYPTO"
+
+  warrant:
+    description: "Warrants (right to buy at a specified price)"
+    eodhd_types:
+      - "Warrant"
+
+  right:
+    description: "Subscription rights (short-lived)"
+    eodhd_types:
+      - "Right"
+
+  unit:
+    description: "Units (bundled securities, e.g., share + warrant)"
+    eodhd_types:
+      - "Unit"
+
+  structured:
+    description: "Structured products, certificates, notes"
+    eodhd_types:
+      - "Structured Product"
+      - "Note"
+
+  other:
+    description: "Catch-all for unmapped security types"
+    eodhd_types: []
+
+# ──────────────────────────────────────────────────────────────────────────────
+# The database stores ALL types. No type is excluded at the database level.
+# Filtering to specific asset classes happens DOWNSTREAM in research scripts.
+# ──────────────────────────────────────────────────────────────────────────────

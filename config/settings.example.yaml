@@ -1,0 +1,136 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# HyperDataBank — Central Configuration
+# ──────────────────────────────────────────────────────────────────────────────
+# University of Konstanz, 2026
+# ──────────────────────────────────────────────────────────────────────────────
+
+# EODHD API
+api:
+  token: "YOUR_EODHD_API_TOKEN_HERE"
+  base_url: "https://eodhd.com/api"
+  request_delay: 0.25            # seconds between requests (4 req/s)
+  max_retries: 3
+  retry_backoff: 5               # seconds, doubles each retry
+  daily_call_limit: 100000       # All-World plan limit
+
+# Data storage
+paths:
+  data_dir: "/Volumes/YOUR_DRIVE/HyperDB"
+  db_file: "/Volumes/YOUR_DRIVE/HyperDB/hyperdb.duckdb"
+  reports_dir: "reports"
+
+# Sample period — prices
+sample:
+  price_start: "1985-01-01"
+  price_end: "2025-12-31"
+  # Corporate actions look further back to catch pre-sample events
+  corporate_action_start: "1970-01-01"
+
+# Beta estimation parameters (Frazzini & Pedersen 2014)
+beta:
+  vol_window: 252                # 1-year daily window
+  vol_min_obs: 120               # minimum daily obs for sigma
+  corr_window: 1260              # 5-year daily window (3-day returns)
+  corr_min_obs: 750              # minimum 3-day obs for rho
+  shrinkage_weight: 0.6          # Vasicek shrinkage weight
+  beta_prior: 1.0                # cross-sectional mean (prior)
+
+# FX base currencies — returns are computed in each of these
+fx_base_currencies:
+  - USD
+  - EUR
+
+# Factor model sources
+factors:
+  ff_base_url: "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp"
+  q_factor_url: "https://global-q.org/uploads/1/2/2/6/122636014/q5_factors_monthly_2024.csv"
+  fred_base_url: "https://fred.stlouisfed.org/graph/fredgraph.csv"
+
+# Download chunk sizes
+chunks:
+  price_flush_interval: 10       # flush to DB every N tickers
+  csv_chunk_size: 1000000        # rows per chunk for legacy CSV reads
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Exchange Configuration
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Exchanges SKIPPED during download (data already downloaded stays in the DB)
+exchange_blacklist:
+  - EUFUND    # 86k European mutual funds
+  - STU       # Stuttgart regional
+  - MU        # Munich regional
+  - BE        # Berlin regional
+  - DU        # Dusseldorf regional
+  - HA        # Hannover regional
+  - HM        # Hamburg regional
+  - INDX      # World indices
+  - GBOND     # Government bonds
+  - SA        # Sao Paulo
+  - SN        # Santiago
+  - LIM       # Lima
+  - TA        # Tel Aviv
+  - QA        # Qatar
+  - JSE       # Johannesburg
+  - XNSA      # Nigeria
+  - XNAI      # Nairobi
+  - KLSE      # Malaysia
+  - JK        # Indonesia
+  - PSE       # Philippines
+  - VN        # Vietnam
+  - KAR       # Pakistan
+  - MCX       # Moscow
+
+# Exchange codes skipped during universe building
+universe_skip_codes:
+  - FOREX
+  - CC
+  - COMM
+  - BOND
+  - MONEY
+
+# Regional download priority
+regions:
+  - name: "North America"
+    asset_classes: ["equity", "etf"]
+    exchanges: ["US", "TO", "V", "NEO", "MX"]
+
+  - name: "Europe"
+    asset_classes: ["equity", "etf"]
+    exchanges:
+      - LSE       # London
+      - XETRA     # Deutsche Boerse
+      - F         # Frankfurt
+      - PA        # Euronext Paris
+      - AS        # Euronext Amsterdam
+      - SW        # SIX Swiss
+      - ST        # Stockholm
+      - CO        # Copenhagen
+      - OL        # Oslo
+      - MC        # Madrid
+      - HE        # Helsinki
+      - BR        # Euronext Brussels
+      - VI        # Vienna
+      - LS        # Euronext Lisbon
+      - IR        # Euronext Dublin
+      - WAR       # Warsaw
+      - AT        # Athens
+      - BUD       # Budapest
+      - PR        # Prague
+      - IC        # Iceland
+      - LU        # Luxembourg
+      - RO        # Bucharest
+      - ZSE       # Zagreb
+
+  - name: "Asia-Pacific"
+    asset_classes: ["equity", "etf"]
+    exchanges:
+      - HK        # Hong Kong
+      - AU        # Australia
+      - KO        # Korea (KOSPI)
+      - KQ        # Korea (KOSDAQ)
+      - TW        # Taiwan
+      - TWO       # Taiwan OTC
+      - SHG       # Shanghai
+      - SHE       # Shenzhen
+      - BK        # Thailand

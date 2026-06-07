@@ -1,0 +1,709 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# HyperDataBank — Exchange Registry
+# ──────────────────────────────────────────────────────────────────────────────
+# Curated metadata for EODHD exchanges.
+# The system discovers all exchanges dynamically from the EODHD API;
+# this file enriches them with region, tier, and research notes.
+#
+# Tiers:
+#   1 = Core developed markets, highest data quality
+#   2 = Important developed markets, good data quality
+#   3 = Emerging markets, variable data quality
+#   4 = Frontier / smaller markets, potentially sparse data
+#
+# EODHD exchange codes are used as primary keys.
+# ──────────────────────────────────────────────────────────────────────────────
+
+exchanges:
+
+  # ── NORTH AMERICA ──────────────────────────────────────────────────────────
+
+  US:
+    name: "United States (NYSE, NASDAQ, AMEX)"
+    country: US
+    region: "North America"
+    currency: USD
+    timezone: "America/New_York"
+    tier: 1
+    notes: "Combined US equities — NYSE, NASDAQ, AMEX, NYSE MKT, NYSE ARCA"
+
+  TO:
+    name: "Toronto Stock Exchange"
+    country: CA
+    region: "North America"
+    currency: CAD
+    timezone: "America/Toronto"
+    tier: 2
+
+  V:
+    name: "TSX Venture Exchange"
+    country: CA
+    region: "North America"
+    currency: CAD
+    timezone: "America/Toronto"
+    tier: 3
+    notes: "Junior/venture exchange, small-cap"
+
+  MX:
+    name: "Mexican Stock Exchange (BMV)"
+    country: MX
+    region: "North America"
+    currency: MXN
+    timezone: "America/Mexico_City"
+    tier: 3
+
+  # ── EUROPE — TIER 1 ───────────────────────────────────────────────────────
+
+  LSE:
+    name: "London Stock Exchange"
+    country: GB
+    region: "Europe"
+    currency: GBP
+    timezone: "Europe/London"
+    tier: 1
+    notes: "Prices in GBX (pence); divide by 100 for GBP"
+
+  XETRA:
+    name: "XETRA (Deutsche Börse)"
+    country: DE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Berlin"
+    tier: 1
+    notes: "Primary German electronic exchange"
+
+  PA:
+    name: "Euronext Paris"
+    country: FR
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Paris"
+    tier: 1
+
+  AS:
+    name: "Euronext Amsterdam"
+    country: NL
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Amsterdam"
+    tier: 1
+
+  SW:
+    name: "SIX Swiss Exchange"
+    country: CH
+    region: "Europe"
+    currency: CHF
+    timezone: "Europe/Zurich"
+    tier: 2
+
+  # ── EUROPE — TIER 2 ───────────────────────────────────────────────────────
+
+  MI:
+    name: "Borsa Italiana (Milan)"
+    country: IT
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Rome"
+    tier: 2
+
+  MC:
+    name: "Bolsa de Madrid"
+    country: ES
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Madrid"
+    tier: 2
+
+  BR:
+    name: "Euronext Brussels"
+    country: BE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Brussels"
+    tier: 2
+
+  LS:
+    name: "Euronext Lisbon"
+    country: PT
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Lisbon"
+    tier: 2
+
+  IR:
+    name: "Euronext Dublin"
+    country: IE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Dublin"
+    tier: 2
+
+  VI:
+    name: "Vienna Stock Exchange"
+    country: AT
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Vienna"
+    tier: 2
+
+  HE:
+    name: "Helsinki Stock Exchange (Nasdaq Nordic)"
+    country: FI
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Helsinki"
+    tier: 2
+
+  CO:
+    name: "Copenhagen Stock Exchange (Nasdaq Nordic)"
+    country: DK
+    region: "Europe"
+    currency: DKK
+    timezone: "Europe/Copenhagen"
+    tier: 2
+
+  ST:
+    name: "Stockholm Stock Exchange (Nasdaq Nordic)"
+    country: SE
+    region: "Europe"
+    currency: SEK
+    timezone: "Europe/Stockholm"
+    tier: 2
+
+  OL:
+    name: "Oslo Stock Exchange"
+    country: "NO"
+    region: "Europe"
+    currency: NOK
+    timezone: "Europe/Oslo"
+    tier: 2
+
+  # ── EUROPE — TIER 2/3 (German regional) ───────────────────────────────────
+
+  F:
+    name: "Frankfurt Stock Exchange"
+    country: DE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Berlin"
+    tier: 3
+    notes: "Regional Frankfurt floor trading"
+
+  STU:
+    name: "Stuttgart Stock Exchange"
+    country: DE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Berlin"
+    tier: 3
+
+  MU:
+    name: "Munich Stock Exchange"
+    country: DE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Berlin"
+    tier: 3
+
+  BE:
+    name: "Berlin Stock Exchange"
+    country: DE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Berlin"
+    tier: 4
+
+  DU:
+    name: "Dusseldorf Stock Exchange"
+    country: DE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Berlin"
+    tier: 4
+
+  HA:
+    name: "Hannover Stock Exchange"
+    country: DE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Berlin"
+    tier: 4
+
+  HM:
+    name: "Hamburg Stock Exchange"
+    country: DE
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Berlin"
+    tier: 4
+
+  # ── EUROPE — TIER 3 (Emerging Europe) ─────────────────────────────────────
+
+  WAR:
+    name: "Warsaw Stock Exchange"
+    country: PL
+    region: "Europe"
+    currency: PLN
+    timezone: "Europe/Warsaw"
+    tier: 3
+
+  PR:
+    name: "Prague Stock Exchange"
+    country: CZ
+    region: "Europe"
+    currency: CZK
+    timezone: "Europe/Prague"
+    tier: 3
+
+  BUD:
+    name: "Budapest Stock Exchange"
+    country: HU
+    region: "Europe"
+    currency: HUF
+    timezone: "Europe/Budapest"
+    tier: 3
+
+  AT:
+    name: "Athens Stock Exchange"
+    country: GR
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Athens"
+    tier: 3
+
+  IS:
+    name: "Borsa Istanbul"
+    country: TR
+    region: "Europe"
+    currency: TRY
+    timezone: "Europe/Istanbul"
+    tier: 3
+
+  MCX:
+    name: "Moscow Exchange"
+    country: RU
+    region: "Europe"
+    currency: RUB
+    timezone: "Europe/Moscow"
+    tier: 4
+    notes: "Limited access due to sanctions since 2022"
+
+  # ── ASIA-PACIFIC — TIER 1 ─────────────────────────────────────────────────
+
+  # TSE: Tokyo Stock Exchange — NOT available on EODHD as of 2026.
+  # Japan equities are not covered by EODHD All-World plan.
+
+  HK:
+    name: "Hong Kong Stock Exchange (HKEX)"
+    country: HK
+    region: "Asia-Pacific"
+    currency: HKD
+    timezone: "Asia/Hong_Kong"
+    tier: 1
+
+  AU:
+    name: "Australian Securities Exchange"
+    country: AU
+    region: "Asia-Pacific"
+    currency: AUD
+    timezone: "Australia/Sydney"
+    tier: 2
+
+  # ── ASIA-PACIFIC — TIER 2 ─────────────────────────────────────────────────
+
+  SG:
+    name: "Singapore Exchange"
+    country: SG
+    region: "Asia-Pacific"
+    currency: SGD
+    timezone: "Asia/Singapore"
+    tier: 2
+
+  KO:
+    name: "Korea Exchange"
+    country: KR
+    region: "Asia-Pacific"
+    currency: KRW
+    timezone: "Asia/Seoul"
+    tier: 2
+
+  TW:
+    name: "Taiwan Stock Exchange"
+    country: TW
+    region: "Asia-Pacific"
+    currency: TWD
+    timezone: "Asia/Taipei"
+    tier: 2
+
+  NZ:
+    name: "New Zealand Exchange"
+    country: NZ
+    region: "Asia-Pacific"
+    currency: NZD
+    timezone: "Pacific/Auckland"
+    tier: 3
+
+  # ── ASIA — TIER 3 (Emerging Asia) ─────────────────────────────────────────
+
+  SHG:
+    name: "Shanghai Stock Exchange"
+    country: CN
+    region: "Asia-Pacific"
+    currency: CNY
+    timezone: "Asia/Shanghai"
+    tier: 3
+    notes: "A-shares (CNY), B-shares (USD)"
+
+  SHE:
+    name: "Shenzhen Stock Exchange"
+    country: CN
+    region: "Asia-Pacific"
+    currency: CNY
+    timezone: "Asia/Shanghai"
+    tier: 3
+
+  NSE:
+    name: "National Stock Exchange of India"
+    country: IN
+    region: "Asia-Pacific"
+    currency: INR
+    timezone: "Asia/Kolkata"
+    tier: 3
+
+  BSE:
+    name: "Bombay Stock Exchange"
+    country: IN
+    region: "Asia-Pacific"
+    currency: INR
+    timezone: "Asia/Kolkata"
+    tier: 3
+
+  BK:
+    name: "Stock Exchange of Thailand"
+    country: TH
+    region: "Asia-Pacific"
+    currency: THB
+    timezone: "Asia/Bangkok"
+    tier: 3
+
+  KLSE:
+    name: "Bursa Malaysia"
+    country: MY
+    region: "Asia-Pacific"
+    currency: MYR
+    timezone: "Asia/Kuala_Lumpur"
+    tier: 3
+
+  JK:
+    name: "Indonesia Stock Exchange"
+    country: ID
+    region: "Asia-Pacific"
+    currency: IDR
+    timezone: "Asia/Jakarta"
+    tier: 3
+
+  PSE:
+    name: "Philippine Stock Exchange"
+    country: PH
+    region: "Asia-Pacific"
+    currency: PHP
+    timezone: "Asia/Manila"
+    tier: 3
+
+  VN:
+    name: "Ho Chi Minh Stock Exchange"
+    country: VN
+    region: "Asia-Pacific"
+    currency: VND
+    timezone: "Asia/Ho_Chi_Minh"
+    tier: 4
+
+  KAR:
+    name: "Pakistan Stock Exchange"
+    country: PK
+    region: "Asia-Pacific"
+    currency: PKR
+    timezone: "Asia/Karachi"
+    tier: 4
+
+  DH:
+    name: "Dhaka Stock Exchange"
+    country: BD
+    region: "Asia-Pacific"
+    currency: BDT
+    timezone: "Asia/Dhaka"
+    tier: 4
+
+  CM:
+    name: "Colombo Stock Exchange"
+    country: LK
+    region: "Asia-Pacific"
+    currency: LKR
+    timezone: "Asia/Colombo"
+    tier: 4
+
+  # ── SOUTH AMERICA ──────────────────────────────────────────────────────────
+
+  SA:
+    name: "B3 — Brasil Bolsa Balcão"
+    country: BR
+    region: "South America"
+    currency: BRL
+    timezone: "America/Sao_Paulo"
+    tier: 3
+
+  SN:
+    name: "Santiago Stock Exchange"
+    country: CL
+    region: "South America"
+    currency: CLP
+    timezone: "America/Santiago"
+    tier: 3
+
+  BA:
+    name: "Buenos Aires Stock Exchange"
+    country: AR
+    region: "South America"
+    currency: ARS
+    timezone: "America/Argentina/Buenos_Aires"
+    tier: 4
+
+  CL:
+    name: "Colombian Stock Exchange"
+    country: CO
+    region: "South America"
+    currency: COP
+    timezone: "America/Bogota"
+    tier: 4
+
+  LIM:
+    name: "Lima Stock Exchange"
+    country: PE
+    region: "South America"
+    currency: PEN
+    timezone: "America/Lima"
+    tier: 4
+
+  # ── MIDDLE EAST ────────────────────────────────────────────────────────────
+
+  TA:
+    name: "Tel Aviv Stock Exchange"
+    country: IL
+    region: "Middle East"
+    currency: ILS
+    timezone: "Asia/Jerusalem"
+    tier: 3
+
+  SR:
+    name: "Saudi Stock Exchange (Tadawul)"
+    country: SA
+    region: "Middle East"
+    currency: SAR
+    timezone: "Asia/Riyadh"
+    tier: 3
+
+  QA:
+    name: "Qatar Stock Exchange"
+    country: QA
+    region: "Middle East"
+    currency: QAR
+    timezone: "Asia/Qatar"
+    tier: 4
+
+  ADX:
+    name: "Abu Dhabi Securities Exchange"
+    country: AE
+    region: "Middle East"
+    currency: AED
+    timezone: "Asia/Dubai"
+    tier: 4
+
+  DFM:
+    name: "Dubai Financial Market"
+    country: AE
+    region: "Middle East"
+    currency: AED
+    timezone: "Asia/Dubai"
+    tier: 4
+
+  KMSE:
+    name: "Kuwait Stock Exchange"
+    country: KW
+    region: "Middle East"
+    currency: KWD
+    timezone: "Asia/Kuwait"
+    tier: 4
+
+  # ── AFRICA ─────────────────────────────────────────────────────────────────
+
+  JSE:
+    name: "Johannesburg Stock Exchange"
+    country: ZA
+    region: "Africa"
+    currency: ZAR
+    timezone: "Africa/Johannesburg"
+    tier: 3
+
+  EGX:
+    name: "Egyptian Exchange"
+    country: EG
+    region: "Africa"
+    currency: EGP
+    timezone: "Africa/Cairo"
+    tier: 4
+
+  XNSA:
+    name: "Nigerian Stock Exchange"
+    country: NG
+    region: "Africa"
+    currency: NGN
+    timezone: "Africa/Lagos"
+    tier: 4
+
+  XNAI:
+    name: "Nairobi Securities Exchange"
+    country: KE
+    region: "Africa"
+    currency: KES
+    timezone: "Africa/Nairobi"
+    tier: 4
+
+  # ── ADDITIONAL EODHD EXCHANGES ──────────────────────────────────────────────
+
+  NEO:
+    name: "NEO Exchange (Canada)"
+    country: CA
+    region: "North America"
+    currency: CAD
+    timezone: "America/Toronto"
+    tier: 3
+
+  KQ:
+    name: "KOSDAQ (Korea)"
+    country: KR
+    region: "Asia-Pacific"
+    currency: KRW
+    timezone: "Asia/Seoul"
+    tier: 2
+
+  TWO:
+    name: "Taiwan OTC Exchange"
+    country: TW
+    region: "Asia-Pacific"
+    currency: TWD
+    timezone: "Asia/Taipei"
+    tier: 3
+
+  IC:
+    name: "Iceland Stock Exchange"
+    country: IS
+    region: "Europe"
+    currency: ISK
+    timezone: "Atlantic/Reykjavik"
+    tier: 4
+
+  LU:
+    name: "Luxembourg Stock Exchange"
+    country: LU
+    region: "Europe"
+    currency: EUR
+    timezone: "Europe/Luxembourg"
+    tier: 4
+
+  RO:
+    name: "Bucharest Stock Exchange"
+    country: RO
+    region: "Europe"
+    currency: RON
+    timezone: "Europe/Bucharest"
+    tier: 4
+
+  ZSE:
+    name: "Zagreb Stock Exchange"
+    country: HR
+    region: "Europe"
+    currency: HRK
+    timezone: "Europe/Zagreb"
+    tier: 4
+
+  BC:
+    name: "Casablanca Stock Exchange"
+    country: MA
+    region: "Africa"
+    currency: MAD
+    timezone: "Africa/Casablanca"
+    tier: 4
+
+  GBOND:
+    name: "Government Bonds"
+    country: XX
+    region: "Global"
+    currency: USD
+    timezone: "UTC"
+    tier: 2
+    notes: "Global government bond data from EODHD"
+
+  EUFUND:
+    name: "European Funds"
+    country: XX
+    region: "Europe"
+    currency: EUR
+    timezone: "UTC"
+    tier: 3
+    notes: "European mutual funds virtual exchange"
+
+  # ── SPECIAL ASSET CLASSES (not exchange-bound) ─────────────────────────────
+
+  FOREX:
+    name: "Foreign Exchange Market"
+    country: XX
+    region: "Global"
+    currency: USD
+    timezone: "UTC"
+    tier: 1
+    notes: "FX pairs, e.g., EUR-USD.FOREX"
+
+  CC:
+    name: "Cryptocurrency Market"
+    country: XX
+    region: "Global"
+    currency: USD
+    timezone: "UTC"
+    tier: 2
+    notes: "Crypto pairs, e.g., BTC-USD.CC"
+
+  INDX:
+    name: "Indices"
+    country: XX
+    region: "Global"
+    currency: USD
+    timezone: "UTC"
+    tier: 1
+    notes: "Major world indices"
+
+  COMM:
+    name: "Commodities"
+    country: XX
+    region: "Global"
+    currency: USD
+    timezone: "UTC"
+    tier: 2
+    notes: "Commodity futures prices"
+
+  BOND:
+    name: "Bonds"
+    country: XX
+    region: "Global"
+    currency: USD
+    timezone: "UTC"
+    tier: 2
+    notes: "Government and corporate bonds"
+
+  MONEY:
+    name: "Money Market / Interest Rates"
+    country: XX
+    region: "Global"
+    currency: USD
+    timezone: "UTC"
+    tier: 2
+    notes: "LIBOR, EURIBOR, T-Bills, etc."
