@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this pipeline in academic work, please cite it."
+title: "HyperDB — A Reproducible Open Pipeline for Publication-Grade Global Equity Data"
+authors:
+  - family-names: Schoen
+    given-names: Tom
+    affiliation: "University of Konstanz"
+type: software
+license: MIT
+repository-code: "https://github.com/SchoenTom/hyperdb"
+keywords:
+  - empirical asset pricing
+  - equity data
+  - survivorship bias
+  - point-in-time data
+  - reproducible research
+  - EODHD
+references:
+  - type: article
+    authors: [{family-names: Ince, given-names: "Ozgur"}, {family-names: Porter, given-names: "R. Burt"}]
+    title: "Individual Equity Return Data from Thomson Datastream: Handle with Care!"
+    journal: "Journal of Financial Research"
+    year: 2006
+  - type: article
+    authors: [{family-names: Shumway, given-names: "Tyler"}]
+    title: "The Delisting Bias in CRSP Data"
+    journal: "The Journal of Finance"
+    year: 1997
+  - type: article
+    authors: [{family-names: Frazzini, given-names: "Andrea"}, {family-names: Pedersen, given-names: "Lasse Heje"}]
+    title: "Betting Against Beta"
+    journal: "Journal of Financial Economics"
+    year: 2014
