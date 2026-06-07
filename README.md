@@ -5,7 +5,6 @@ for empirical asset-pricing research. The repository contains the **pipeline onl
 distributes no vendor data. Researchers supply their own data-provider API key and rebuild the
 database locally, so that results are independently reproducible rather than taken on trust.
 
-University of Konstanz.
 
 ## Scope and intent
 
