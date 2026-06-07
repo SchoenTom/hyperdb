@@ -47,14 +47,14 @@ def compute_monthly_returns(exchange_code: str | None = None) -> pd.DataFrame:
     logger.info("Computing monthly returns for %s...",
                 exchange_code or "ALL exchanges")
 
-    # Build query for silver prices with asset metadata
+    # Build query for cleaned prices with asset metadata
     where_clause = ""
     params = []
     if exchange_code:
         where_clause = "AND a.exchange_code = ?"
         params.append(exchange_code)
 
-    # Compute monthly returns from daily silver prices
+    # Compute monthly returns from daily cleaned prices
     # Monthly return = (last_adj / first_adj) - 1
     monthly_local = conn.execute(f"""
         WITH daily AS (
@@ -68,7 +68,7 @@ def compute_monthly_returns(exchange_code: str | None = None) -> pd.DataFrame:
                 p.close,
                 p.volume,
                 DATE_TRUNC('month', p.date) AS month
-            FROM silver_price_daily p
+            FROM clean_price_daily p
             JOIN dim_asset a ON p.asset_id = a.asset_id
             WHERE p.adjusted_close > 0
               {where_clause}
@@ -108,7 +108,7 @@ def compute_monthly_returns(exchange_code: str | None = None) -> pd.DataFrame:
     """, params).fetchdf()
 
     if monthly_local.empty:
-        logger.warning("No monthly returns computed — no silver price data.")
+        logger.warning("No monthly returns computed — no cleaned price data.")
         conn.close()
         return monthly_local
 
@@ -127,7 +127,7 @@ def compute_monthly_returns(exchange_code: str | None = None) -> pd.DataFrame:
             FIRST_VALUE(rate)
                 OVER (PARTITION BY base_currency, DATE_TRUNC('month', date)
                       ORDER BY date) AS fx_first
-        FROM silver_fx_daily
+        FROM clean_fx_daily
         WHERE quote_currency = 'USD'
     """).fetchdf()
 

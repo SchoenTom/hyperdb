@@ -13,7 +13,7 @@
 2. **Survivorship-bias-free.** Delisted instruments included; delisting returns imputed
    (Shumway). Index membership is point-in-time, never today's list backward.
 3. **Documented, reproducible cleaning.** Every screen has a threshold, a reason, a reference,
-   and a logged row-impact. Bronze is immutable & vintaged, so any result re-derives from a
+   and a logged row-impact. Raw is immutable & vintaged, so any result re-derives from a
    frozen snapshot.
 4. **Proven, not asserted.** A benchmark suite must pass before the database is called
    publication-grade.
@@ -28,13 +28,13 @@ References: Ince & Porter (2006); Hanauer et al. (2021); Shumway (1997); Shumway
    DataProvider   provider.py (ABC) ── eodhd · sharadar · …
    (interface)         │  every response hashed → meta_manifest
                        ▼
-   BRONZE   immutable, vintaged raw            bronze_* + meta_manifest, meta_vintage
+   RAW   immutable, vintaged raw            raw_* + meta_manifest, meta_vintage
                        │  screens · point-in-time total return
                        ▼
-   SILVER   cleaned, screened, PIT returns      silver_price_daily, silver_fx_daily
+   CLEANED   cleaned, screened, PIT returns      clean_price_daily, clean_fx_daily
                        │  monthly aggregation · delisting · factors · beta
                        ▼
-   GOLD     analysis-ready monthly panel        gold_monthly_panel, gold_factor_return
+   PANEL     analysis-ready monthly panel        panel_monthly, factor_return
    DIM      company · entity · listing · exchange · calendar · index_membership (PIT)
    META     meta_manifest · meta_vintage · meta_download_log
 ```
@@ -43,7 +43,7 @@ Build (CLI): `universe → download → calendar → transform screen → transf
 transform clean → transform delisting → transform panel → transform factors-align →
 audit --full → audit --benchmarks`.
 
-## 2. Ingestion — provider abstraction & vintaged Bronze
+## 2. Ingestion — provider abstraction & vintaged Raw
 
 **`DataProvider` interface** (`src/ingest/provider.py`): adapters return *normalized* records so
 provider quirks stay isolated. Methods: `list_exchanges`, `list_symbols(include_delisted=True)`,
@@ -51,9 +51,9 @@ provider quirks stay isolated. Methods: `list_exchanges`, `list_symbols(include_
 `get_fundamentals` (with report/filing dates), `get_delisting`. The default `eodhd` adapter
 wraps the rate-limited API client; a `sharadar` adapter can back the US sub-universe.
 
-**Vintaged Bronze (provenance).** Every API response is recorded in `meta_manifest`
+**Vintaged Raw (provenance).** Every API response is recorded in `meta_manifest`
 (`endpoint, params, response_sha256, n_rows, fetched_at, vintage_id`). A download campaign is a
-*vintage*; Bronze is append-only and carries `vintage_id`, so results trace to a frozen snapshot
+*vintage*; Raw is append-only and carries `vintage_id`, so results trace to a frozen snapshot
 even though vendor data is revised over time.
 
 ## 3. Universe & identifier integrity
@@ -70,7 +70,7 @@ model resolving ticker reuse, ticker changes, cross-listings, and share classes)
 **Point-in-time index membership** (`dim_index_membership`, `(index, member, start, end)`):
 membership is always queried as-of-date, never "current constituents backward."
 
-## 4. Bronze → Silver — total return, screens, cleaning
+## 4. Raw → Cleaned — total return, screens, cleaning
 
 **Point-in-time total return** (`src/transform/total_return.py`). Returns are reconstructed from
 **unadjusted close + cash dividends + split factors known as of each date**, not from a vendor
@@ -108,7 +108,7 @@ NYSE/AMEX, **−55%** Nasdaq/OTC); neutral delistings keep their realized return
 `delisting_return` + `delisting_flag`; a benchmark shows the small-cap return gap **with vs
 without** the adjustment.
 
-## 6. Silver → Gold — returns, FX, factors, beta, fundamentals
+## 6. Cleaned → Panel — returns, FX, factors, beta, fundamentals
 
 - **Monthly returns** compound `return_pit`; **FX** is snapped to the same month-end stamp as
   the equity close, with a USD↔EUR triangulation check.
@@ -142,9 +142,9 @@ cross-check vs an independent benchmark extract where available · corporate-act
 
 - Identity: `dim_company`, `dim_entity`, `dim_listing` (+ `isin, security_type,
   primary_listing, first_seen, last_seen, delist_date, delist_reason`); `dim_index_membership`.
-- `bronze_price_daily`: + `raw_close`, `vintage_id`.
-- `silver_price_daily`: + `return_pit`, `return_vendor`, `screen_flags` (bitmask).
-- `gold_monthly_panel`: + `delisting_return`, `delisting_flag`, `mktcap_beg` (t-1 weight).
+- `raw_price_daily`: + `raw_close`, `vintage_id`.
+- `clean_price_daily`: + `return_pit`, `return_vendor`, `screen_flags` (bitmask).
+- `panel_monthly`: + `delisting_return`, `delisting_flag`, `mktcap_beg` (t-1 weight).
 - `meta_manifest`, `meta_vintage`.
 
 ## 10. Config (`config/settings.yaml`; example tracked)

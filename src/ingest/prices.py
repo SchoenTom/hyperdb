@@ -1,7 +1,7 @@
 """
 HyperDataBank — Price Downloader
 ─────────────────────────────────
-Downloads end-of-day price data from EODHD into bronze_price_daily.
+Downloads end-of-day price data from EODHD into raw_price_daily.
 
 Two modes:
     1. BACKFILL: Per-ticker historical download (initial load).
@@ -133,7 +133,7 @@ def backfill_prices(exchange_code: str | None = None,
         logger.info("  Resume: %d already downloaded", len(done_set))
 
     # --- Staging DB approach ---
-    # The main DB's bronze_price_daily PK index (348M+ rows) exceeds
+    # The main DB's raw_price_daily PK index (348M+ rows) exceeds
     # available RAM (8GB machine). Write new prices into a staging DB
     # without PK constraints, then merge later.
     from src.core.config import get_db_path
@@ -141,7 +141,7 @@ def backfill_prices(exchange_code: str | None = None,
     staging = duckdb.connect(staging_path, config={'threads': '1', 'memory_limit': '2GB'})
     staging.execute("SET preserve_insertion_order = false")
     staging.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_price_staging (
+        CREATE TABLE IF NOT EXISTS raw_price_staging (
             asset_id        VARCHAR NOT NULL,
             date            DATE NOT NULL,
             open            DOUBLE,
@@ -203,7 +203,7 @@ def backfill_prices(exchange_code: str | None = None,
 
         if rows:
             staging.executemany("""
-                INSERT INTO bronze_price_staging
+                INSERT INTO raw_price_staging
                     (asset_id, date, open, high, low, close,
                      adjusted_close, volume)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -237,8 +237,8 @@ def backfill_prices(exchange_code: str | None = None,
         logger.info("New prices are in staging DB: %s", staging_path)
         logger.info("Merge into main DB later with: "
                      "ATTACH '%s' AS stg; "
-                     "INSERT OR IGNORE INTO bronze_price_daily "
-                     "SELECT * FROM stg.bronze_price_staging;",
+                     "INSERT OR IGNORE INTO raw_price_daily "
+                     "SELECT * FROM stg.raw_price_staging;",
                      staging_path)
 
 
@@ -286,7 +286,7 @@ def bulk_update_prices(exchange_code: str,
         asset_id = row[0]
         try:
             conn.execute("""
-                INSERT OR IGNORE INTO bronze_price_daily
+                INSERT OR IGNORE INTO raw_price_daily
                     (asset_id, date, open, high, low, close,
                      adjusted_close, volume)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -390,7 +390,7 @@ def _backfill_exchange(exchange_code: str, client: EODHDClient,
 
         if rows:
             conn.executemany("""
-                INSERT OR IGNORE INTO bronze_price_daily
+                INSERT OR IGNORE INTO raw_price_daily
                     (asset_id, date, open, high, low, close,
                      adjusted_close, volume)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)

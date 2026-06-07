@@ -57,7 +57,7 @@ def compute_quality_scores(exchange_code: str | None = None) -> None:
             COUNT(*) AS n_obs,
             SUM(CASE WHEN p.return_flag = 'extreme' THEN 1 ELSE 0 END) AS n_extreme,
             SUM(CASE WHEN p.return_flag = 'sentinel' THEN 1 ELSE 0 END) AS n_sentinel
-        FROM silver_price_daily p
+        FROM clean_price_daily p
         JOIN dim_asset a ON p.asset_id = a.asset_id
         WHERE 1=1 {where_clause}
         GROUP BY a.asset_id, a.exchange_code

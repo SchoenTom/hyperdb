@@ -1,5 +1,5 @@
 """
-HyperDataBank — Data Cleaning (Bronze → Silver)
+HyperDataBank — Data Cleaning (Raw → Cleaned)
 ────────────────────────────────────────────────
 Minimal, transparent cleaning rules. We remove only data that is
 physically impossible or clearly corrupt. We never apply opinionated
@@ -13,7 +13,7 @@ Cleaning rules:
     C5: Flag (but do NOT remove) EODHD sentinel values ($99,999)
     C6: Compute daily returns and log returns
 
-The silver_price_daily table contains every valid price observation
+The clean_price_daily table contains every valid price observation
 with precomputed returns and quality flags.
 
 What we do NOT do here:
@@ -35,9 +35,9 @@ logger = get_logger("hyperdb.clean")
 
 
 def clean_prices(exchange_code: str | None = None) -> None:
-    """Clean bronze prices into silver layer.
+    """Clean raw prices into cleaned layer.
 
-    This operation is idempotent — it replaces all silver_price_daily
+    This operation is idempotent — it replaces all clean_price_daily
     rows for the specified exchange (or all exchanges).
 
     Args:
@@ -53,19 +53,19 @@ def clean_prices(exchange_code: str | None = None) -> None:
         where_clause = "AND a.exchange_code = ?"
         params.append(exchange_code)
 
-    logger.info("Cleaning prices (Bronze → Silver) for %s...",
+    logger.info("Cleaning prices (Raw → Cleaned) for %s...",
                 exchange_code or "ALL exchanges")
 
-    # Delete existing silver data for this scope (idempotent)
+    # Delete existing cleaned data for this scope (idempotent)
     if exchange_code:
         conn.execute("""
-            DELETE FROM silver_price_daily
+            DELETE FROM clean_price_daily
             WHERE asset_id IN (
                 SELECT asset_id FROM dim_asset WHERE exchange_code = ?
             )
         """, [exchange_code])
     else:
-        conn.execute("DELETE FROM silver_price_daily")
+        conn.execute("DELETE FROM clean_price_daily")
 
     # Insert cleaned data with computed returns.
     # Window function computes daily return within each asset.
@@ -80,7 +80,7 @@ def clean_prices(exchange_code: str | None = None) -> None:
     #   - 'sentinel' if close > 99000 or adjusted_close > 99000
     #   - 'clean' otherwise
     conn.execute(f"""
-        INSERT INTO silver_price_daily
+        INSERT INTO clean_price_daily
             (asset_id, date, open, high, low, close, adjusted_close,
              volume, daily_return, log_return, return_flag)
         SELECT
@@ -109,7 +109,7 @@ def clean_prices(exchange_code: str | None = None) -> None:
                     THEN 'extreme'
                 ELSE 'clean'
             END AS return_flag
-        FROM bronze_price_daily p
+        FROM raw_price_daily p
         JOIN dim_asset a ON p.asset_id = a.asset_id
         WHERE p.adjusted_close > 0
           AND p.close > 0
@@ -126,7 +126,7 @@ def clean_prices(exchange_code: str | None = None) -> None:
                 SUM(CASE WHEN return_flag = 'clean' THEN 1 ELSE 0 END) AS clean,
                 SUM(CASE WHEN return_flag = 'extreme' THEN 1 ELSE 0 END) AS extreme,
                 SUM(CASE WHEN return_flag = 'sentinel' THEN 1 ELSE 0 END) AS sentinel
-            FROM silver_price_daily
+            FROM clean_price_daily
             WHERE asset_id IN (
                 SELECT asset_id FROM dim_asset WHERE exchange_code = ?
             )
@@ -138,11 +138,11 @@ def clean_prices(exchange_code: str | None = None) -> None:
                 SUM(CASE WHEN return_flag = 'clean' THEN 1 ELSE 0 END) AS clean,
                 SUM(CASE WHEN return_flag = 'extreme' THEN 1 ELSE 0 END) AS extreme,
                 SUM(CASE WHEN return_flag = 'sentinel' THEN 1 ELSE 0 END) AS sentinel
-            FROM silver_price_daily
+            FROM clean_price_daily
         """).fetchone()
 
     total, clean, extreme, sentinel = stats
-    logger.info("Silver prices: %d total rows", total)
+    logger.info("Cleaned prices: %d total rows", total)
     logger.info("  Clean: %d  |  Extreme returns: %d  |  Sentinel values: %d",
                 clean, extreme, sentinel)
 
@@ -150,7 +150,7 @@ def clean_prices(exchange_code: str | None = None) -> None:
 
 
 def clean_fx(conn: duckdb.DuckDBPyConnection | None = None) -> None:
-    """Clean bronze FX rates into silver_fx_daily.
+    """Clean raw FX rates into clean_fx_daily.
 
     Computes the closing rate and log returns for each currency pair.
     """
@@ -159,12 +159,12 @@ def clean_fx(conn: duckdb.DuckDBPyConnection | None = None) -> None:
         conn = get_connection()
         close_after = True
 
-    logger.info("Cleaning FX rates (Bronze → Silver)...")
+    logger.info("Cleaning FX rates (Raw → Cleaned)...")
 
-    conn.execute("DELETE FROM silver_fx_daily")
+    conn.execute("DELETE FROM clean_fx_daily")
 
     conn.execute("""
-        INSERT INTO silver_fx_daily (date, base_currency, quote_currency,
+        INSERT INTO clean_fx_daily (date, base_currency, quote_currency,
                                       rate, log_return)
         SELECT
             date,
@@ -174,13 +174,13 @@ def clean_fx(conn: duckdb.DuckDBPyConnection | None = None) -> None:
             LN(close / LAG(close)
                 OVER (PARTITION BY base_currency, quote_currency
                       ORDER BY date)) AS log_return
-        FROM bronze_fx_daily
+        FROM raw_fx_daily
         WHERE close > 0 AND close IS NOT NULL
         ORDER BY base_currency, quote_currency, date
     """)
 
-    count = conn.execute("SELECT COUNT(*) FROM silver_fx_daily").fetchone()[0]
-    logger.info("Silver FX: %d rows", count)
+    count = conn.execute("SELECT COUNT(*) FROM clean_fx_daily").fetchone()[0]
+    logger.info("Cleaned FX: %d rows", count)
 
     if close_after:
         conn.close()

@@ -108,7 +108,7 @@ def download_fx_rates(from_date: str | None = None,
 
         if rows:
             conn.executemany("""
-                INSERT OR IGNORE INTO bronze_fx_daily
+                INSERT OR IGNORE INTO raw_fx_daily
                     (date, base_currency, quote_currency,
                      open, high, low, close, adjusted_close, volume)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -131,7 +131,7 @@ def download_fx_rates(from_date: str | None = None,
             ))
         if rows:
             conn.executemany("""
-                INSERT OR IGNORE INTO bronze_fx_daily
+                INSERT OR IGNORE INTO raw_fx_daily
                     (date, base_currency, quote_currency,
                      open, high, low, close, adjusted_close, volume)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)

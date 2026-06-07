@@ -107,7 +107,7 @@ def run_audit(exchange_code: str | None = None,
             SUM(CASE WHEN p.adjusted_close IS NULL THEN 1 ELSE 0 END) AS null_adj,
             SUM(CASE WHEN p.adjusted_close <= 0 THEN 1 ELSE 0 END) AS neg_adj,
             SUM(CASE WHEN p.volume IS NULL THEN 1 ELSE 0 END) AS null_vol
-        FROM bronze_price_daily p
+        FROM raw_price_daily p
         JOIN dim_asset a ON p.asset_id = a.asset_id
         WHERE 1=1 {where_asset}
     """, params).fetchone()
@@ -123,31 +123,31 @@ def run_audit(exchange_code: str | None = None,
     else:
         r("  No price data found.")
 
-    # Silver layer stats
-    silver_stats = conn.execute(f"""
+    # Cleaned layer stats
+    clean_stats = conn.execute(f"""
         SELECT
             COUNT(*) AS total,
             SUM(CASE WHEN return_flag = 'clean' THEN 1 ELSE 0 END),
             SUM(CASE WHEN return_flag = 'extreme' THEN 1 ELSE 0 END),
             SUM(CASE WHEN return_flag = 'sentinel' THEN 1 ELSE 0 END)
-        FROM silver_price_daily p
+        FROM clean_price_daily p
         JOIN dim_asset a ON p.asset_id = a.asset_id
         WHERE 1=1 {where_asset}
     """, params).fetchone()
 
-    if silver_stats[0] > 0:
-        r(f"\n  Silver layer:")
-        r(f"    Total: {silver_stats[0]:,}")
-        r(f"    Clean: {silver_stats[1]:,}")
-        r(f"    Extreme returns: {silver_stats[2]:,}")
-        r(f"    Sentinel values: {silver_stats[3]:,}")
+    if clean_stats[0] > 0:
+        r(f"\n  Cleaned layer:")
+        r(f"    Total: {clean_stats[0]:,}")
+        r(f"    Clean: {clean_stats[1]:,}")
+        r(f"    Extreme returns: {clean_stats[2]:,}")
+        r(f"    Sentinel values: {clean_stats[3]:,}")
 
     # ── CHECK 4: CORPORATE ACTIONS ─────────────────────────────────────────
     r(_section("4. CORPORATE ACTIONS"))
 
     split_count = conn.execute(f"""
         SELECT COUNT(*), COUNT(DISTINCT s.asset_id)
-        FROM bronze_split s
+        FROM raw_split s
         JOIN dim_asset a ON s.asset_id = a.asset_id
         WHERE 1=1 {where_asset}
     """, params).fetchone()
@@ -155,7 +155,7 @@ def run_audit(exchange_code: str | None = None,
 
     div_count = conn.execute(f"""
         SELECT COUNT(*), COUNT(DISTINCT d.asset_id)
-        FROM bronze_dividend d
+        FROM raw_dividend d
         JOIN dim_asset a ON d.asset_id = a.asset_id
         WHERE 1=1 {where_asset}
     """, params).fetchone()
@@ -164,7 +164,7 @@ def run_audit(exchange_code: str | None = None,
     # Sentinel dividend check
     sentinel_divs = conn.execute(f"""
         SELECT COUNT(*)
-        FROM bronze_dividend d
+        FROM raw_dividend d
         JOIN dim_asset a ON d.asset_id = a.asset_id
         WHERE d.value > 99000 {where_asset}
     """, params).fetchone()[0]
@@ -199,7 +199,7 @@ def run_audit(exchange_code: str | None = None,
 
     fx_stats = conn.execute("""
         SELECT base_currency, COUNT(*), MIN(date), MAX(date)
-        FROM bronze_fx_daily
+        FROM raw_fx_daily
         GROUP BY base_currency
         ORDER BY base_currency
     """).fetchall()
@@ -217,7 +217,7 @@ def run_audit(exchange_code: str | None = None,
         WHERE a.currency IS NOT NULL
           AND a.currency != 'USD'
           AND a.currency NOT IN (
-              SELECT DISTINCT base_currency FROM bronze_fx_daily
+              SELECT DISTINCT base_currency FROM raw_fx_daily
           )
     """).fetchall()
 
@@ -232,7 +232,7 @@ def run_audit(exchange_code: str | None = None,
 
     factor_stats = conn.execute("""
         SELECT region, model, frequency, COUNT(*), MIN(date), MAX(date)
-        FROM gold_factor_return
+        FROM factor_return
         GROUP BY region, model, frequency
         ORDER BY region, model, frequency
     """).fetchall()
@@ -257,7 +257,7 @@ def run_audit(exchange_code: str | None = None,
             AVG(beta_local) AS mean_beta,
             SUM(CASE WHEN return_local IS NULL THEN 1 ELSE 0 END) AS null_return,
             SUM(CASE WHEN beta_local IS NULL THEN 1 ELSE 0 END) AS null_beta
-        FROM gold_monthly_panel p
+        FROM panel_monthly p
         {"JOIN dim_asset a ON p.asset_id = a.asset_id WHERE " + where_asset.replace("AND ", "") if exchange_code else ""}
     """, params if exchange_code else []).fetchone()
 

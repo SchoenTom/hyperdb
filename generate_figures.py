@@ -78,7 +78,7 @@ def fig1_coverage_over_time():
         SELECT EXTRACT(YEAR FROM p.date) AS year,
                e.region,
                COUNT(DISTINCT p.asset_id) AS assets
-        FROM bronze_price_daily p
+        FROM raw_price_daily p
         JOIN dim_asset a ON p.asset_id = a.asset_id
         JOIN dim_exchange e ON a.exchange_code = e.exchange_code
         WHERE e.region IS NOT NULL
@@ -120,7 +120,7 @@ def fig2_exchange_ranking():
                COUNT(*) AS observations,
                COUNT(DISTINCT p.asset_id) AS assets,
                MIN(p.date) AS first_date
-        FROM bronze_price_daily p
+        FROM raw_price_daily p
         JOIN dim_asset a ON p.asset_id = a.asset_id
         JOIN dim_exchange e ON a.exchange_code = e.exchange_code
         GROUP BY 1, 2 ORDER BY 3 DESC LIMIT 20
@@ -168,7 +168,7 @@ def fig3_survivorship():
     timeline = con.execute("""
         SELECT EXTRACT(YEAR FROM MAX(p.date)) AS last_year,
                COUNT(DISTINCT p.asset_id) AS assets
-        FROM bronze_price_daily p
+        FROM raw_price_daily p
         GROUP BY p.asset_id
     """).fetchdf()
     con.close()
@@ -218,7 +218,7 @@ def fig4_data_depth():
         SELECT p.asset_id,
                DATEDIFF('year', MIN(p.date), MAX(p.date)) AS years_of_data,
                COUNT(*) AS trading_days
-        FROM bronze_price_daily p
+        FROM raw_price_daily p
         GROUP BY 1
     """).fetchdf()
     con.close()
@@ -260,7 +260,7 @@ def fig5_cross_section():
     df = con.execute("""
         SELECT month, exchange_code,
                COUNT(DISTINCT asset_id) AS assets
-        FROM gold_monthly_panel
+        FROM panel_monthly
         GROUP BY 1, 2
     """).fetchdf()
     con.close()
@@ -295,7 +295,7 @@ def fig6_return_distribution():
     """Monthly return distribution with normal overlay and fat-tail analysis."""
     con = get_conn()
     df = con.execute("""
-        SELECT return_local FROM gold_monthly_panel
+        SELECT return_local FROM panel_monthly
         WHERE return_local IS NOT NULL
           AND return_local BETWEEN -1.0 AND 2.0
     """).fetchdf()
@@ -359,7 +359,7 @@ def fig7_currency_coverage():
     fx = con.execute("""
         SELECT base_currency, COUNT(*) AS days,
                MIN(date) AS first_date, MAX(date) AS last_date
-        FROM bronze_fx_daily
+        FROM raw_fx_daily
         WHERE quote_currency = 'USD'
         GROUP BY 1
         ORDER BY 2 DESC
@@ -411,13 +411,13 @@ def fig8_pipeline_integrity():
     """).fetchdf()
 
     tables = con.execute("""
-        SELECT 'Bronze Prices' as layer, COUNT(*) as n FROM bronze_price_daily
-        UNION ALL SELECT 'Silver Prices', COUNT(*) FROM silver_price_daily
-        UNION ALL SELECT 'Gold Panel', COUNT(*) FROM gold_monthly_panel
-        UNION ALL SELECT 'Splits', COUNT(*) FROM bronze_split
-        UNION ALL SELECT 'Dividends', COUNT(*) FROM bronze_dividend
-        UNION ALL SELECT 'FX Rates', COUNT(*) FROM bronze_fx_daily
-        UNION ALL SELECT 'Factor Returns', COUNT(*) FROM gold_factor_return
+        SELECT 'Raw Prices' as layer, COUNT(*) as n FROM raw_price_daily
+        UNION ALL SELECT 'Cleaned Prices', COUNT(*) FROM clean_price_daily
+        UNION ALL SELECT 'Panel Panel', COUNT(*) FROM panel_monthly
+        UNION ALL SELECT 'Splits', COUNT(*) FROM raw_split
+        UNION ALL SELECT 'Dividends', COUNT(*) FROM raw_dividend
+        UNION ALL SELECT 'FX Rates', COUNT(*) FROM raw_fx_daily
+        UNION ALL SELECT 'Factor Returns', COUNT(*) FROM factor_return
         UNION ALL SELECT 'Quality Scores', COUNT(*) FROM meta_data_quality
     """).fetchdf()
     con.close()
@@ -443,7 +443,7 @@ def fig8_pipeline_integrity():
 
     # Right: data volume per table (log scale)
     tables = tables.sort_values("n")
-    colors_list = [COLORS["main"] if "Bronze" in l or "Silver" in l or "Gold" in l
+    colors_list = [COLORS["main"] if "Raw" in l or "Cleaned" in l or "Panel" in l
                    else COLORS["accent"] for l in tables["layer"]]
     ax2.barh(tables["layer"], tables["n"], color=colors_list,
              edgecolor="white", linewidth=0.5)

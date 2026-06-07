@@ -304,14 +304,14 @@ def cmd_download_bonds(args):
 
 
 def cmd_transform_clean(args):
-    """Clean prices (Bronze -> Silver)."""
+    """Clean prices (Raw -> Cleaned)."""
     from src.transform.clean import clean_prices, clean_fx
     clean_prices(exchange_code=args.exchange)
     clean_fx()
 
 
 def cmd_transform_panel(args):
-    """Build monthly panel (Silver -> Gold)."""
+    """Build monthly panel (Cleaned -> Panel)."""
     from src.transform.panel import build_panel, build_panel_all
 
     if args.exchange:
@@ -342,7 +342,7 @@ def cmd_audit(args):
 def cmd_purge_ballast(args):
     """Delete price data for blacklisted exchanges to reclaim disk space.
 
-    Removes rows from bronze_price_daily and meta_download_log
+    Removes rows from raw_price_daily and meta_download_log
     for exchanges in the blacklist. Then runs CHECKPOINT to
     allow DuckDB to reclaim disk space on next open.
     """
@@ -365,7 +365,7 @@ def cmd_purge_ballast(args):
         return
 
     print(f"Purging price data for {len(targets)} exchanges: {targets}")
-    print("This will DELETE rows from bronze_price_daily and meta_download_log.")
+    print("This will DELETE rows from raw_price_daily and meta_download_log.")
 
     if not args.yes:
         confirm = input("Continue? [y/N] ")
@@ -378,7 +378,7 @@ def cmd_purge_ballast(args):
     for ex_code in targets:
         # Count before delete
         count = conn.execute("""
-            SELECT COUNT(*) FROM bronze_price_daily
+            SELECT COUNT(*) FROM raw_price_daily
             WHERE asset_id IN (
                 SELECT asset_id FROM dim_asset WHERE exchange_code = ?
             )
@@ -391,7 +391,7 @@ def cmd_purge_ballast(args):
         print(f"  {ex_code}: deleting {count:,} price rows...", end=" ", flush=True)
 
         conn.execute("""
-            DELETE FROM bronze_price_daily
+            DELETE FROM raw_price_daily
             WHERE asset_id IN (
                 SELECT asset_id FROM dim_asset WHERE exchange_code = ?
             )
@@ -526,7 +526,7 @@ def cmd_migrate_legacy(args):
                 ))
 
             conn.executemany("""
-                INSERT OR IGNORE INTO bronze_price_daily
+                INSERT OR IGNORE INTO raw_price_daily
                     (asset_id, date, open, high, low, close,
                      adjusted_close, volume)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -550,7 +550,7 @@ def cmd_migrate_legacy(args):
             rows.append((asset_id, row.get("date"), row.get("split_ratio")))
 
         conn.executemany("""
-            INSERT OR IGNORE INTO bronze_split
+            INSERT OR IGNORE INTO raw_split
                 (asset_id, date, split_ratio)
             VALUES (?, ?, ?)
         """, rows)
@@ -576,7 +576,7 @@ def cmd_migrate_legacy(args):
             ))
 
         conn.executemany("""
-            INSERT OR IGNORE INTO bronze_dividend
+            INSERT OR IGNORE INTO raw_dividend
                 (asset_id, date, value, unadjusted_value, currency,
                  declaration_date, record_date, payment_date, period)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -679,7 +679,7 @@ def main():
     p_tr = subparsers.add_parser("transform", help="Transform data")
     tr_sub = p_tr.add_subparsers(dest="tr_command")
 
-    p_clean = tr_sub.add_parser("clean", help="Clean prices (Bronze→Silver)")
+    p_clean = tr_sub.add_parser("clean", help="Clean prices (Raw→Cleaned)")
     p_clean.add_argument("--exchange", "-e", help="Exchange code")
     p_clean.set_defaults(func=cmd_transform_clean)
 

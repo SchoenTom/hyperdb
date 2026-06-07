@@ -22,9 +22,9 @@ python cli.py download smart           # ~5 days, API-rate-bound, resumable
 python cli.py calendar                 # real exchange calendars
 python cli.py transform screen         # Ince-Porter static/dynamic screens
 python cli.py transform total-return   # point-in-time total returns
-python cli.py transform clean          # Bronze -> Silver
+python cli.py transform clean          # Raw -> Cleaned
 python cli.py transform delisting      # Shumway delisting returns
-python cli.py transform panel          # Silver -> Gold (returns, beta, mv[t-1])
+python cli.py transform panel          # Cleaned -> Panel (returns, beta, mv[t-1])
 python cli.py transform factors-align  # availability-lagged factor merge
 python cli.py audit --full             # integrity + coverage
 python cli.py audit --benchmarks       # publication-grade gate (see below)
@@ -43,7 +43,7 @@ A build is **publication-grade** only when `audit --benchmarks` reports PASS on 
 - Schema version matches `meta_schema_version`.
 
 ### B. Missing-data policy ("no NaNs" — the honest definition)
-- The Gold **clean view** has **NO NaN in core fields** (`return_pit`, `mktcap_beg`, ids, dates).
+- The Panel **clean view** has **NO NaN in core fields** (`return_pit`, `mktcap_beg`, ids, dates).
 - **Gaps are represented as absent rows, never fabricated or interpolated.** No forward-fill of
   prices into non-trading periods; no synthetic returns.
 - Every removed/missing value traces to exactly one rule: *physically impossible* (removed) or
@@ -69,7 +69,7 @@ A build is **publication-grade** only when `audit --benchmarks` reports PASS on 
 
 ### E. Reproducibility
 - Re-running a sampled exchange from its `vintage_id` yields identical `response_sha256` and
-  identical Silver hashes. Two people with the same provider/plan/vintage get the same DB.
+  identical Cleaned hashes. Two people with the same provider/plan/vintage get the same DB.
 
 ## Verifying *your* build
 `python cli.py audit --benchmarks` writes a generated validation report under `docs/`. Compare

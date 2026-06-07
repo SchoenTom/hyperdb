@@ -9,11 +9,11 @@ Downloads risk factor returns from academic sources:
     3. Q-Factor model (monthly) — US
     4. TED Spread (monthly) — from FRED
 
-All factor data is stored in gold_factor_return with a uniform schema:
+All factor data is stored in factor_return with a uniform schema:
     (date, frequency, region, model, factor_name, value)
 
 This allows queries like:
-    SELECT * FROM gold_factor_return
+    SELECT * FROM factor_return
     WHERE region = 'Europe' AND model = 'FF5' AND frequency = 'monthly'
 """
 
@@ -206,7 +206,7 @@ def _parse_ff_csv(csv_text: str, frequency: str) -> pd.DataFrame:
 
 
 def download_ff_factors() -> None:
-    """Download all Fama-French factor files and store in gold_factor_return."""
+    """Download all Fama-French factor files and store in factor_return."""
     init_schema()
     conn = get_connection()
     settings = load_settings()
@@ -228,7 +228,7 @@ def download_ff_factors() -> None:
             logger.warning("  Skipping %s — no data parsed", zip_name)
             continue
 
-        # Melt to long format and insert into gold_factor_return
+        # Melt to long format and insert into factor_return
         value_cols = [c for c in df.columns if c != "date"]
         count = 0
         for _, row in df.iterrows():
@@ -238,7 +238,7 @@ def download_ff_factors() -> None:
                     continue
                 try:
                     conn.execute("""
-                        INSERT OR IGNORE INTO gold_factor_return
+                        INSERT OR IGNORE INTO factor_return
                             (date, frequency, region, model,
                              factor_name, value)
                         VALUES (?, ?, ?, ?, ?, ?)
@@ -318,7 +318,7 @@ def download_q_factors() -> None:
                 fval = fval / 100.0
             try:
                 conn.execute("""
-                    INSERT OR IGNORE INTO gold_factor_return
+                    INSERT OR IGNORE INTO factor_return
                         (date, frequency, region, model,
                          factor_name, value)
                     VALUES (?, 'monthly', 'US', 'Q', ?, ?)
@@ -371,7 +371,7 @@ def download_ted_spread() -> None:
     for _, row in df.iterrows():
         try:
             conn.execute("""
-                INSERT OR IGNORE INTO gold_factor_return
+                INSERT OR IGNORE INTO factor_return
                     (date, frequency, region, model,
                      factor_name, value)
                 VALUES (?, 'monthly', 'US', 'Spread', 'ted', ?)

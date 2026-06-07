@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this pipeline in academic work, please cite it."
-title: "HyperDB — A Reproducible Open Pipeline for Publication-Grade Global Equity Data"
+title: "HyperDB — A Reproducible Pipeline for Global Equity Research Data"
 authors:
   - family-names: Schoen
     given-names: Tom

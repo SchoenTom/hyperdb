@@ -95,7 +95,7 @@ def estimate_betas(exchange_code: str) -> pd.DataFrame:
     # Load local market factor (daily)
     mkt_local = conn.execute("""
         SELECT date, value AS mkt_rf
-        FROM gold_factor_return
+        FROM factor_return
         WHERE region = ? AND model IN ('FF3', 'FF5')
           AND factor_name = 'mkt_rf' AND frequency = 'daily'
         ORDER BY date
@@ -104,7 +104,7 @@ def estimate_betas(exchange_code: str) -> pd.DataFrame:
     # Load risk-free rate
     rf_data = conn.execute("""
         SELECT date, value AS rf
-        FROM gold_factor_return
+        FROM factor_return
         WHERE region = ? AND model IN ('FF3', 'FF5')
           AND factor_name = 'rf' AND frequency = 'daily'
         ORDER BY date
@@ -113,7 +113,7 @@ def estimate_betas(exchange_code: str) -> pd.DataFrame:
     # Load global market factor
     mkt_global = conn.execute("""
         SELECT date, value AS mkt_global
-        FROM gold_factor_return
+        FROM factor_return
         WHERE region = 'Global' AND model IN ('FF3', 'FF5')
           AND factor_name = 'mkt_rf' AND frequency = 'daily'
         ORDER BY date
@@ -150,10 +150,10 @@ def estimate_betas(exchange_code: str) -> pd.DataFrame:
 
     mkt_local = mkt_local.set_index("date")
 
-    # Load silver prices for this exchange
+    # Load cleaned prices for this exchange
     prices = conn.execute("""
         SELECT p.asset_id, p.date, p.adjusted_close, p.daily_return
-        FROM silver_price_daily p
+        FROM clean_price_daily p
         JOIN dim_asset a ON p.asset_id = a.asset_id
         WHERE a.exchange_code = ?
           AND p.adjusted_close > 0

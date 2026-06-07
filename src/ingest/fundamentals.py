@@ -271,7 +271,7 @@ def _store_financials(conn, asset_id, data):
 
                     try:
                         conn.execute("""
-                            INSERT OR IGNORE INTO bronze_fundamental
+                            INSERT OR IGNORE INTO raw_fundamental
                                 (asset_id, report_date, period_type,
                                  statement_type, filing_date,
                                  currency_symbol, line_item, value)
@@ -300,7 +300,7 @@ def _store_earnings(conn, asset_id, data):
         report_date = record.get("reportDate") or date_key
         try:
             conn.execute("""
-                INSERT OR IGNORE INTO bronze_earnings
+                INSERT OR IGNORE INTO raw_earnings
                     (asset_id, report_date, eps_actual, eps_estimate,
                      eps_difference, surprise_pct)
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -330,7 +330,7 @@ def _store_shares_outstanding(conn, asset_id, data):
                 continue
             try:
                 conn.execute("""
-                    INSERT OR IGNORE INTO bronze_shares_outstanding
+                    INSERT OR IGNORE INTO raw_shares_outstanding
                         (asset_id, date, shares_mln, shares_raw)
                     VALUES (?, ?, ?, ?)
                 """, [
@@ -360,7 +360,7 @@ def _store_insider_transactions(conn, asset_id, data):
             continue
         try:
             conn.execute("""
-                INSERT INTO bronze_insider_transaction
+                INSERT INTO raw_insider_transaction
                     (asset_id, date, owner_name, transaction_type,
                      shares, value, owner_title, security_name)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -392,7 +392,7 @@ def _store_etf_holdings(conn, asset_id, data):
             continue
         try:
             conn.execute("""
-                INSERT INTO bronze_etf_holding
+                INSERT INTO raw_etf_holding
                     (asset_id, holding_code, holding_name, holding_isin,
                      weight_pct, sector, country, asset_class)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)

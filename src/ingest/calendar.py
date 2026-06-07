@@ -48,7 +48,7 @@ def build_calendar(exchange_code: str | None = None) -> None:
         # Find all unique dates with price data for this exchange
         trading_dates = conn.execute("""
             SELECT DISTINCT p.date
-            FROM bronze_price_daily p
+            FROM raw_price_daily p
             JOIN dim_asset a ON p.asset_id = a.asset_id
             WHERE a.exchange_code = ?
             ORDER BY p.date

@@ -1,7 +1,7 @@
 """
 HyperDataBank — Corporate Actions Downloader
 ──────────────────────────────────────────────
-Downloads splits and dividends from EODHD into bronze tables.
+Downloads splits and dividends from EODHD into raw tables.
 
 ALL fields from EODHD are stored without modification:
     Splits:     date, split (ratio string)
@@ -113,7 +113,7 @@ def download_splits(exchange_code: str | None = None,
 
         if rows:
             conn.executemany("""
-                INSERT OR IGNORE INTO bronze_split
+                INSERT OR IGNORE INTO raw_split
                     (asset_id, date, split_ratio)
                 VALUES (?, ?, ?)
             """, rows)
@@ -196,7 +196,7 @@ def download_dividends(exchange_code: str | None = None,
 
         if rows:
             conn.executemany("""
-                INSERT OR IGNORE INTO bronze_dividend
+                INSERT OR IGNORE INTO raw_dividend
                     (asset_id, date, value, unadjusted_value, currency,
                      declaration_date, record_date, payment_date, period)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)

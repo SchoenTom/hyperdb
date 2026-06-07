@@ -4,9 +4,9 @@ HyperDataBank — Database Layer (DuckDB)
 Central schema definition and connection management.
 
 Architecture:
-    bronze_*   Raw data from EODHD, stored as-is.  Full reproducibility.
-    silver_*   Cleaned, validated, cross-referenced.  Minimal opinionated transforms.
-    gold_*     Derived quantities (returns, betas, panels).  Analysis-ready.
+    raw_*   Raw data from EODHD, stored as-is.  Full reproducibility.
+    clean_*   Cleaned, validated, cross-referenced.  Minimal opinionated transforms.
+    panel_*     Derived quantities (returns, betas, panels).  Analysis-ready.
     dim_*      Dimension / lookup tables.
     meta_*     Pipeline metadata (download logs, quality scores).
 
@@ -222,12 +222,12 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     # ══════════════════════════════════════════════════════════════════════════
-    # BRONZE TABLES — Raw data from EODHD, stored as-is
+    # RAW TABLES — Raw data from EODHD, stored as-is
     # ══════════════════════════════════════════════════════════════════════════
 
     # Daily OHLCV prices — ALL fields from EODHD /eod/ endpoint.
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_price_daily (
+        CREATE TABLE IF NOT EXISTS raw_price_daily (
             asset_id            VARCHAR NOT NULL,
             date                DATE NOT NULL,
             open                DOUBLE,
@@ -242,7 +242,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_split (
+        CREATE TABLE IF NOT EXISTS raw_split (
             asset_id            VARCHAR NOT NULL,
             date                DATE NOT NULL,
             split_ratio         VARCHAR,
@@ -252,7 +252,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_dividend (
+        CREATE TABLE IF NOT EXISTS raw_dividend (
             asset_id            VARCHAR NOT NULL,
             date                DATE NOT NULL,
             value               DOUBLE,
@@ -272,7 +272,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     # and Cash Flow — quarterly and annual — in a single table.
     # Economists can pivot/filter as needed for their research.
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_fundamental (
+        CREATE TABLE IF NOT EXISTS raw_fundamental (
             asset_id            VARCHAR NOT NULL,
             report_date         DATE NOT NULL,
             period_type         VARCHAR NOT NULL,
@@ -288,7 +288,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_earnings (
+        CREATE TABLE IF NOT EXISTS raw_earnings (
             asset_id            VARCHAR NOT NULL,
             report_date         DATE NOT NULL,
             eps_actual          DOUBLE,
@@ -301,7 +301,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_shares_outstanding (
+        CREATE TABLE IF NOT EXISTS raw_shares_outstanding (
             asset_id            VARCHAR NOT NULL,
             date                DATE NOT NULL,
             shares_mln          DOUBLE,
@@ -312,7 +312,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_insider_transaction (
+        CREATE TABLE IF NOT EXISTS raw_insider_transaction (
             asset_id            VARCHAR NOT NULL,
             date                DATE NOT NULL,
             owner_name          VARCHAR,
@@ -326,7 +326,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_etf_holding (
+        CREATE TABLE IF NOT EXISTS raw_etf_holding (
             asset_id            VARCHAR NOT NULL,
             holding_code        VARCHAR,
             holding_name        VARCHAR,
@@ -340,7 +340,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_fx_daily (
+        CREATE TABLE IF NOT EXISTS raw_fx_daily (
             date                DATE NOT NULL,
             base_currency       VARCHAR NOT NULL,
             quote_currency      VARCHAR NOT NULL,
@@ -356,7 +356,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_macro_indicator (
+        CREATE TABLE IF NOT EXISTS raw_macro_indicator (
             country_iso2        VARCHAR NOT NULL,
             indicator           VARCHAR NOT NULL,
             date                DATE NOT NULL,
@@ -369,7 +369,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
 
     # Bond-specific fields from EODHD fundamentals endpoint.
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS bronze_bond_detail (
+        CREATE TABLE IF NOT EXISTS raw_bond_detail (
             asset_id            VARCHAR PRIMARY KEY,
             issuer_name         VARCHAR,
             issuer_country      VARCHAR,
@@ -394,16 +394,16 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     # ══════════════════════════════════════════════════════════════════════════
-    # SILVER TABLES — Cleaned, validated data
+    # CLEANED TABLES — Cleaned, validated data
     # ══════════════════════════════════════════════════════════════════════════
-    # Cleaning rules (Bronze → Silver):
+    # Cleaning rules (Raw → Cleaned):
     #   1. Remove rows with null/negative adjusted_close
     #   2. Remove rows with clearly corrupt data (sentinel values)
     #   3. Forward-fill minor gaps (≤3 trading days) in prices
     #   4. Flag but DO NOT remove extreme returns — they are informational
     #   5. Cross-reference with corporate actions for consistency
     #
-    # What we do NOT do in Silver:
+    # What we do NOT do in Cleaned:
     #   - No penny stock filtering
     #   - No volume filtering
     #   - No exchange filtering
@@ -411,7 +411,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     #   These belong DOWNSTREAM in research scripts.
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS silver_price_daily (
+        CREATE TABLE IF NOT EXISTS clean_price_daily (
             asset_id            VARCHAR NOT NULL,
             date                DATE NOT NULL,
             open                DOUBLE,
@@ -428,7 +428,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS silver_fx_daily (
+        CREATE TABLE IF NOT EXISTS clean_fx_daily (
             date                DATE NOT NULL,
             base_currency       VARCHAR NOT NULL,
             quote_currency      VARCHAR NOT NULL,
@@ -439,11 +439,11 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     # ══════════════════════════════════════════════════════════════════════════
-    # GOLD TABLES — Analysis-ready derived quantities
+    # PANEL TABLES — Analysis-ready derived quantities
     # ══════════════════════════════════════════════════════════════════════════
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS gold_monthly_panel (
+        CREATE TABLE IF NOT EXISTS panel_monthly (
             asset_id                VARCHAR NOT NULL,
             month                   DATE NOT NULL,
             exchange_code           VARCHAR,
@@ -481,7 +481,7 @@ def init_schema(conn: duckdb.DuckDBPyConnection | None = None) -> None:
     """)
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS gold_factor_return (
+        CREATE TABLE IF NOT EXISTS factor_return (
             date                DATE NOT NULL,
             frequency           VARCHAR NOT NULL,
             region              VARCHAR NOT NULL,

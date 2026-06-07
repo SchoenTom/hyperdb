@@ -134,7 +134,7 @@ computation. `Designed`
 `config`; no in-sample tuning. `Designed`
 
 **T22 — Non-reproducibility / vendor revision.** Vendor data changes; results can't be
-re-derived. *Countermeasure:* immutable, vintaged Bronze + per-response manifests + hash-based
+re-derived. *Countermeasure:* immutable, vintaged Raw + per-response manifests + hash-based
 reproducibility check; results pinned to a `vintage_id`. *Verify:* re-run yields identical
 hashes. `Designed`
 

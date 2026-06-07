@@ -2,7 +2,7 @@
 HyperDataBank — Monthly Panel Builder
 ──────────────────────────────────────
 Combines returns, risk metrics, and metadata into the
-gold_monthly_panel table.
+panel_monthly table.
 
 This is the primary analysis-ready output of HyperDataBank.
 Each row represents one instrument-month observation with:
@@ -29,7 +29,7 @@ logger = get_logger("hyperdb.panel")
 
 
 def build_panel(exchange_code: str) -> None:
-    """Build the gold monthly panel for a specific exchange.
+    """Build the panel monthly panel for a specific exchange.
 
     This combines:
         1. Monthly returns (local, USD, EUR)
@@ -37,7 +37,7 @@ def build_panel(exchange_code: str) -> None:
         3. Liquidity metrics
         4. Quality flags
 
-    Results are stored in gold_monthly_panel.
+    Results are stored in panel_monthly.
 
     Args:
         exchange_code: The exchange to process.
@@ -68,7 +68,7 @@ def build_panel(exchange_code: str) -> None:
         SELECT
             DATE_TRUNC('month', date) AS month,
             SUM(value) AS rf_monthly
-        FROM gold_factor_return
+        FROM factor_return
         WHERE region = ? AND factor_name = 'rf' AND frequency = 'daily'
         GROUP BY DATE_TRUNC('month', date)
     """, [region]).fetchdf()
@@ -114,10 +114,10 @@ def build_panel(exchange_code: str) -> None:
     panel["beta_global"] = np.nan
     panel["turnover_ratio"] = np.nan
 
-    # Step 5: Write to gold_monthly_panel
+    # Step 5: Write to panel_monthly
     # Delete existing data for this exchange (idempotent)
     conn.execute("""
-        DELETE FROM gold_monthly_panel
+        DELETE FROM panel_monthly
         WHERE asset_id IN (
             SELECT asset_id FROM dim_asset WHERE exchange_code = ?
         )
@@ -146,12 +146,12 @@ def build_panel(exchange_code: str) -> None:
     panel_out["month"] = panel_out["month"].dt.strftime("%Y-%m-%d")
 
     conn.execute("""
-        INSERT INTO gold_monthly_panel
+        INSERT INTO panel_monthly
         SELECT * FROM panel_out
     """)
 
     count = conn.execute("""
-        SELECT COUNT(*) FROM gold_monthly_panel
+        SELECT COUNT(*) FROM panel_monthly
         WHERE asset_id IN (
             SELECT asset_id FROM dim_asset WHERE exchange_code = ?
         )
@@ -175,7 +175,7 @@ def build_panel_all(exchanges: list[str] | None = None) -> None:
     if exchanges is None:
         rows = conn.execute("""
             SELECT DISTINCT a.exchange_code
-            FROM silver_price_daily p
+            FROM clean_price_daily p
             JOIN dim_asset a ON p.asset_id = a.asset_id
             WHERE a.exchange_code NOT IN ('FOREX', 'CC', 'INDX',
                                            'COMM', 'BOND', 'MONEY')

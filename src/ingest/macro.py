@@ -9,7 +9,7 @@ Available indicators include:
     population_total, real_interest_rate, current_account_balance,
     government_debt_to_gdp, trade_balance, and more.
 
-Data is stored per country (ISO 3166-1 alpha-3) in bronze_macro_indicator.
+Data is stored per country (ISO 3166-1 alpha-3) in raw_macro_indicator.
 """
 
 from tqdm import tqdm
@@ -108,7 +108,7 @@ def download_macro(countries: list[str] | None = None) -> None:
 
                 try:
                     conn.execute("""
-                        INSERT OR IGNORE INTO bronze_macro_indicator
+                        INSERT OR IGNORE INTO raw_macro_indicator
                             (country_iso2, indicator, date, period, value)
                         VALUES (?, ?, ?, ?, ?)
                     """, [cc2, indicator, date_val, period, float_val])

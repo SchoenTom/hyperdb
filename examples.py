@@ -16,7 +16,7 @@ def example_1_basic_query():
     con = duckdb.connect(DB, read_only=True)
     df = con.execute("""
         SELECT date, open, high, low, close, adjusted_close, volume
-        FROM bronze_price_daily
+        FROM raw_price_daily
         WHERE asset_id = 'US:AAPL:equity'
           AND date >= '2020-01-01'
         ORDER BY date
@@ -36,7 +36,7 @@ def example_2_monthly_panel():
     df = con.execute("""
         SELECT asset_id, month, return_local, beta_local,
                median_price_local, mean_volume, trading_days
-        FROM gold_monthly_panel
+        FROM panel_monthly
         WHERE exchange_code = 'US'
           AND month >= '2020-01-01'
           AND data_quality_flag IN ('clean', 'no_beta')
@@ -58,7 +58,7 @@ def example_3_cross_sectional():
     df = con.execute("""
         SELECT g.asset_id, a.name, g.return_local, g.beta_local,
                g.median_price_local, g.mean_volume
-        FROM gold_monthly_panel g
+        FROM panel_monthly g
         JOIN dim_asset a ON g.asset_id = a.asset_id
         WHERE g.exchange_code = 'US'
           AND g.month = '2024-12-01'
@@ -81,7 +81,7 @@ def example_4_factor_model():
     con = duckdb.connect(DB, read_only=True)
     df = con.execute("""
         SELECT date, factor_name, value
-        FROM gold_factor_return
+        FROM factor_return
         WHERE model = 'FF3'
           AND region = 'US'
           AND frequency = 'daily'
@@ -104,7 +104,7 @@ def example_5_corporate_actions():
     con = duckdb.connect(DB, read_only=True)
     splits = con.execute("""
         SELECT s.date, s.split_ratio, a.name
-        FROM bronze_split s
+        FROM raw_split s
         JOIN dim_asset a ON s.asset_id = a.asset_id
         WHERE s.asset_id = 'US:AAPL:equity'
         ORDER BY s.date
@@ -112,7 +112,7 @@ def example_5_corporate_actions():
 
     divs = con.execute("""
         SELECT date, value, currency
-        FROM bronze_dividend
+        FROM raw_dividend
         WHERE asset_id = 'US:AAPL:equity'
           AND date >= '2020-01-01'
         ORDER BY date
@@ -140,7 +140,7 @@ def example_6_multi_exchange():
                COUNT(*) AS observations,
                MIN(p.date) AS first_date,
                MAX(p.date) AS last_date
-        FROM bronze_price_daily p
+        FROM raw_price_daily p
         JOIN dim_asset a ON p.asset_id = a.asset_id
         JOIN dim_exchange e ON a.exchange_code = e.exchange_code
         GROUP BY 1, 2, 3
