@@ -101,10 +101,8 @@ is heuristic where ISIN is missing — see [docs/VALIDITY.md](docs/VALIDITY.md).
 
 For research use only; provided "as is", without warranty; not investment advice;
 historical data, not for live trading — see [docs/DISCLAIMER.md](docs/DISCLAIMER.md). The
-pipeline design, code, and documentation were developed with assistance from an AI coding
-assistant (Anthropic's Claude); the author reviewed and validated all content and is
-solely responsible for it.
-
+pipeline was developed with assistance from an AI coding.
+assistant
 ## Citation · References
 
 Cite via [CITATION.cff](CITATION.cff). Built on Ince & Porter (2006), Shumway (1997),
