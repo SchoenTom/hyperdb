@@ -2,7 +2,7 @@
 """
 HyperDataBank — Unified Command-Line Interface
 ────────────────────────────────────────────────
-University of Konstanz, 2026
+2026
 
 A worldwide, multi-asset-class financial database built on EODHD data.
 

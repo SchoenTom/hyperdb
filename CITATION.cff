@@ -4,7 +4,6 @@ title: "HyperDB — A Reproducible Pipeline for Global Equity Research Data"
 authors:
   - family-names: Schoen
     given-names: Tom
-    affiliation: "University of Konstanz"
 type: software
 license: MIT
 repository-code: "https://github.com/SchoenTom/hyperdb"
