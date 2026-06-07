@@ -29,7 +29,6 @@ Compustat, Bloomberg). Documented limitations are listed in [VALIDITY.md](VALIDI
 quantified by the build's coverage report.
 
 **Use of AI tools.** The pipeline design, code, and documentation were developed with assistance
-from an AI coding assistant (Anthropic's Claude). The author reviewed, revised, and validated all
-content and is solely responsible for its correctness.
+from an AI coding assistant (Anthropic's Claude).
 
 **Citation.** If you use this pipeline in academic work, please cite it (see `CITATION.cff`).
