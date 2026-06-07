@@ -47,7 +47,7 @@ A build is **publication-grade** only when `audit --benchmarks` reports PASS on 
 - **Gaps are represented as absent rows, never fabricated or interpolated.** No forward-fill of
   prices into non-trading periods; no synthetic returns.
 - Every removed/missing value traces to exactly one rule: *physically impossible* (removed) or
-  *screen* (flagged) — with counts logged to `VALIDATION_REPORT.md`. Nothing is silently dropped.
+  *screen* (flagged) — with counts logged to the build's validation report. Nothing is silently dropped.
 
 ### C. Coverage ("well-filled, legitimate")
 - Per-asset trading-day completeness vs the real exchange calendar ≥ threshold (flag below).
@@ -72,13 +72,13 @@ A build is **publication-grade** only when `audit --benchmarks` reports PASS on 
   identical Silver hashes. Two people with the same provider/plan/vintage get the same DB.
 
 ## Verifying *your* build
-`python cli.py audit --benchmarks` writes `docs/VALIDATION_REPORT.md`. Compare it to the
-reference numbers the repo ships per vintage. All PASS ⇒ you hold the same publication-grade
+`python cli.py audit --benchmarks` writes a generated validation report under `docs/`. Compare
+it to the reference numbers shipped per vintage. All PASS ⇒ you hold the same publication-grade
 database.
 
 ## Honesty clause
 EODHD ≠ Bloomberg/CRSP. Known limitations (pre-2000 survivorship, FX gaps, ADR handling,
-sentinel values) are enumerated in `LIMITATIONS.md`. The pipeline's value is that every
+sentinel values) are enumerated in [VALIDITY.md](VALIDITY.md). The pipeline's value is that every
 cleaning choice is explicit, referenced, and reproducible — the accepted standard for
 Datastream-class data in published research.
 

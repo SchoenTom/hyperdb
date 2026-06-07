@@ -85,6 +85,6 @@ change is itself a signal). Steps:
 
 This is the **best achievable PERMNO-analogue from EODHD**, not CRSP. We lack CRSP's curated,
 point-in-time CUSIP history. Where ISIN is missing or corporate actions are undocumented,
-linkage is heuristic and flagged. `LIMITATIONS.md` will quantify the unresolved share after the
+linkage is heuristic and flagged. The build's coverage report quantifies the unresolved share after the
 build. The value is that identity is *explicitly modeled, confidence-scored, and verifiable* —
 not silently assumed by a ticker string.

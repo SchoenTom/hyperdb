@@ -18,7 +18,7 @@ by `(exchange,ticker)`, two distinct firms collapse into one fictitious 35-year 
 *Devalues:* fabricated continuity, contaminated long-run returns, broken survivorship logic.
 *Countermeasure:* permanent surrogate identity (`entity_id`) anchored on ISIN + listing
 intervals + corporate-action linkage; a trading gap followed by a new ISIN ⇒ new entity. See
-`ENTITY_RESOLUTION.md`. *Verify:* GM/MCI/`anchor` reuse cases resolve to ≥2 entities. `Designed`
+[IDENTITY.md](IDENTITY.md). *Verify:* GM/MCI/`anchor` reuse cases resolve to ≥2 entities. `Designed`
 
 **T2 — Ticker change for the same firm.** Same company, new ticker (FB→META 2022; GOOG→
 GOOGL). Naive keying splits one firm into two truncated series.
@@ -64,7 +64,7 @@ splits known as of each date**; keep vendor adjusted only as a cross-check. *Ver
 
 **T9 — Factor release lag (the misalignment bug).** Ken French / q-factors are published after
 month-end; merging by calendar month without an availability rule mis-dates them by one month —
-the exact bug found in the GPA-CF project (long-only β flipped from ≈ −0.2 to ≈ +1.0 once
+a well-documented real-world failure (a long-only β flips from ≈ −0.2 to ≈ +1.0 once
 corrected). *Countermeasure:* availability-aware factor alignment + a hard **anchor-event test**
 (COVID US Mkt-RF ≈ −13.35% must land on 2020-03; `corr ≥ 0.95 @ lag 0` or the build fails).
 *Verify:* anchor test in `benchmarks.py`. `Designed`
@@ -80,7 +80,7 @@ as-reported with report/filing dates; vintaged so restatements don't leak backwa
 
 **T12 — Point-in-time index membership.** Using today's S&P 500 list historically is
 survivorship + look-ahead. *Countermeasure:* `dim_index_membership` with start/end intervals
-(seeded from the GPA-CF monthly constituent files); membership is always as-of-date. `Designed`
+(seeded from monthly index-constituent files); membership is always as-of-date. `Designed`
 
 ## D. Data errors & corporate actions
 
@@ -103,7 +103,7 @@ calendar; cross-sectional breadth per month) with thresholds and a published cov
 gaps represented as **absent rows**, never filled. *Verify:* coverage gates. `Designed`
 
 **T16 — Backfill bias in vendor data.** Vendors backfill history when adding a name; placeholder
-zeros masquerade as data (the GPA-CF E-score lesson: 38–53% zeros pre-2010).
+zeros masquerade as data (e.g., vendor ESG scores backfilled with placeholder zeros for 38–53% of pre-2010 observations).
 *Countermeasure:* detect placeholder/backfill runs; start-date / zero-contamination analysis
 before trusting early history. `Designed`
 
@@ -131,7 +131,7 @@ computation. `Designed`
 
 **T21 — Data-snooping in the pipeline itself.** Tuning screen thresholds to get nice results.
 *Countermeasure:* every threshold fixed **ex ante** from the literature, documented in
-`config` + `METHODOLOGY.md`; no in-sample tuning. `Designed`
+`config`; no in-sample tuning. `Designed`
 
 **T22 — Non-reproducibility / vendor revision.** Vendor data changes; results can't be
 re-derived. *Countermeasure:* immutable, vintaged Bronze + per-response manifests + hash-based
